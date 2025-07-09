@@ -79,7 +79,16 @@ class PersisterHelper
 
         // iterate over to-one association mappings
         foreach ($class->associationMappings as $assoc) {
-            if (! $assoc->isToOneOwningSide()) {
+            /*
+             * Prevent infinite loops when looking for master_user_id and finding it in self-referring relation
+             */
+            if (
+                !$assoc->isToOneOwningSide()
+                || (
+                    $columnName === 'master_user_id'
+                    && $assoc->fieldName !== 'masterUser'
+                )
+            ) {
                 continue;
             }
 

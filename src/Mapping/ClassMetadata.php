@@ -2366,12 +2366,17 @@ class ClassMetadata implements PersistenceClassMetadata, Stringable
         }
 
         foreach ($this->associationMappings as $assocName => $mapping) {
-            if (
-                $this->isAssociationWithSingleJoinColumn($assocName) &&
-                assert($this->associationMappings[$assocName]->isToOneOwningSide()) &&
-                $this->associationMappings[$assocName]->joinColumns[0]->name === $columnName
-            ) {
-                return $assocName;
+            /**
+             * Allow lookup in multi-column joins
+             */
+            if (!assert($this->associationMappings[$assocName]->isToOneOwningSide())) {
+                continue;
+            }
+
+            foreach ($mapping as $joinColumn) {
+                if ($joinColumn->name === $columnName) {
+                    return $assocName;
+                }
             }
         }
 
