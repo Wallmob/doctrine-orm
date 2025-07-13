@@ -2369,7 +2369,7 @@ class ClassMetadata implements PersistenceClassMetadata, Stringable
             /**
              * Allow lookup in multi-column joins
              */
-            if (!assert($this->associationMappings[$assocName]->isToOneOwningSide())) {
+            /*if (!assert($this->associationMappings[$assocName]->isToOneOwningSide())) {
                 continue;
             }
 
@@ -2377,6 +2377,13 @@ class ClassMetadata implements PersistenceClassMetadata, Stringable
                 if ($joinColumn->name === $columnName) {
                     return $assocName;
                 }
+            }*/
+            if (
+                $this->isAssociationWithSingleJoinColumn($assocName) &&
+                assert($this->associationMappings[$assocName]->isToOneOwningSide()) &&
+                $this->associationMappings[$assocName]->joinColumns[0]->name === $columnName
+            ) {
+                return $assocName;
             }
         }
 
