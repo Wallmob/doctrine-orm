@@ -9,10 +9,10 @@ use Doctrine\Common\Collections\Expr\Comparison;
 use Doctrine\DBAL\Types\EnumType;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\Query\Expr\Func;
 use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\Tests\Mocks\AttributeDriverFactory;
 use Doctrine\Tests\Models\DataTransferObjects\DtoWithArrayOfEnums;
 use Doctrine\Tests\Models\DataTransferObjects\DtoWithEnum;
 use Doctrine\Tests\Models\Enums\BookCategory;
@@ -35,7 +35,6 @@ use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 use function class_exists;
-use function dirname;
 use function sprintf;
 use function uniqid;
 
@@ -45,7 +44,9 @@ class EnumTest extends OrmFunctionalTestCase
     {
         parent::setUp();
 
-        $this->_em         = $this->getEntityManager(null, new AttributeDriver([dirname(__DIR__, 2) . '/Models/Enums'], true));
+        $mappingDriver = AttributeDriverFactory::createAttributeDriver([__DIR__ . '/../../Models/Enums']);
+
+        $this->_em         = $this->getEntityManager(null, $mappingDriver);
         $this->_schemaTool = new SchemaTool($this->_em);
 
         if ($this->isSecondLevelCacheEnabled) {
@@ -558,7 +559,7 @@ EXCEPTION
         $library = $this->_em->find(Library::class, $library->id);
         self::assertFalse($library->books->isInitialized(), 'Pre-condition: lazy collection');
 
-        $result = $library->books->matching(Criteria::create()->where($comparison));
+        $result = $library->books->matching(Criteria::create(true)->where($comparison));
 
         self::assertCount(1, $result);
         self::assertSame($nonfictionBook->id, $result[0]->id);
@@ -587,7 +588,7 @@ EXCEPTION
         $category = $this->_em->find(BookCategory::class, $category->id);
         self::assertFalse($category->books->isInitialized(), 'Pre-condition: lazy collection');
 
-        $result = $category->books->matching(Criteria::create()->where($comparison));
+        $result = $category->books->matching(Criteria::create(true)->where($comparison));
 
         self::assertCount(1, $result);
         self::assertSame($nonfictionBook->id, $result[0]->id);

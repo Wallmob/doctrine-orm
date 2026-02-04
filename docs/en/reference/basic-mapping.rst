@@ -182,6 +182,37 @@ Here is a complete list of ``Column``s attributes (all optional):
 - ``options``: Key-value pairs of options that get passed
   to the underlying database platform when generating DDL statements.
 
+Specifying default values
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While it is possible to specify default values for properties in your
+PHP class, Doctrine also allows you to specify default values for
+database columns using the ``default`` key in the ``options`` array of
+the ``Column`` attribute.
+
+When using XML, you can specify object instances using the ``<object>``
+element:
+
+.. code-block:: xml
+
+    <field name="createdAt" type="datetime" insertable="false" updatable="false">
+        <options>
+            <option name="default">
+                <object class="Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp"/>
+            </option>
+        </options>
+    </field>
+
+The ``<object>`` element requires a ``class`` attribute specifying the
+fully qualified class name to instantiate.
+
+.. configuration-block::
+   .. literalinclude:: basic-mapping/DefaultValues.php
+       :language: attribute
+
+   .. literalinclude:: basic-mapping/default-values.xml
+       :language: xml
+
 .. _reference-php-mapping-types:
 
 PHP Types Mapping
